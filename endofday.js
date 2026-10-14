@@ -28,16 +28,6 @@
         return (h ? parseInt(h[1], 10) : 0) * 60 + (m ? parseInt(m[1], 10) : 0);
     }
 
-    function parseTotalMinutes(text) {
-        if (!text) return null;
-        const matches = [...text.matchAll(/(\d+)\s*h(?:\s*(\d+)\s*m)?|(\d+)\s*m/gi)];
-        if (matches.length < 2) return null;
-        const last = matches[matches.length - 1];
-        return last[3] !== undefined
-            ? parseInt(last[3], 10)
-            : parseInt(last[1], 10) * 60 + (last[2] ? parseInt(last[2], 10) : 0);
-    }
-
     // Language-agnostic: only looks for the H:MM / H.MM pattern (optional am/pm marker).
     // Returns minutes since midnight, or null if no clock time is found.
     function parseClockMinutes(text) {
@@ -66,6 +56,8 @@
 
     const work_deficit_spans = document.getElementsByClassName("dashboard-worktime-remaining deficit");
     const work_excess_spans = document.getElementsByClassName("dashboard-worktime-remaining excess");
+    const work_time_div = work_deficit_span ? work_deficit_span.parentElement : work_excess_span.parentElement
+    const total_work_span = work_time_div ? (work_time_div.querySelectorAll("span").length > 0 ? work_time_div.querySelectorAll("span")[work_time_div.querySelectorAll("span").length - 1] : null) : null;
     const pause_span = document.getElementById("zeSollIst-pausehhmm");
     const started_divs = document.getElementsByClassName("dashboard-worktime-started-info");
 
@@ -108,7 +100,7 @@
         }
 
         let remainingWorkMin = work_deficit_span ? parseDuration(work_deficit_span.textContent) : -parseDuration(work_excess_span.textContent);
-        let totalWorkMin = parseTotalMinutes(work_deficit_span ? work_deficit_span.textContent : work_excess_span);
+        let totalWorkMin = total_work_span ? parseDuration(total_work_span.textContent) : null;
         
         const pauseMin = parseDuration(pause_span.textContent);
 
