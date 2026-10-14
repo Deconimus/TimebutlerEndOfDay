@@ -56,8 +56,6 @@
 
     const work_deficit_spans = document.getElementsByClassName("dashboard-worktime-remaining deficit");
     const work_excess_spans = document.getElementsByClassName("dashboard-worktime-remaining excess");
-    const work_time_div = work_deficit_span ? work_deficit_span.parentElement : work_excess_span.parentElement
-    const total_work_span = work_time_div ? (work_time_div.querySelectorAll("span").length > 0 ? work_time_div.querySelectorAll("span")[work_time_div.querySelectorAll("span").length - 1] : null) : null;
     const pause_span = document.getElementById("zeSollIst-pausehhmm");
     const started_divs = document.getElementsByClassName("dashboard-worktime-started-info");
 
@@ -90,6 +88,8 @@
 
         const work_deficit_span = work_deficit_spans.length > 0 ? work_deficit_spans[0] : null;
         const work_excess_span = work_excess_spans.length > 0 ? work_excess_spans[0] : null;
+        const work_time_div = work_deficit_span ? work_deficit_span.parentElement : work_excess_span.parentElement
+        const total_work_span = work_time_div ? (work_time_div.querySelectorAll("span").length > 0 ? work_time_div.querySelectorAll("span")[work_time_div.querySelectorAll("span").length - 1] : null) : null;
         const started_div = started_divs[0];
 
         const started_span = started_div.querySelector("span:not(#tb-end-time)");
@@ -101,7 +101,7 @@
 
         let remainingWorkMin = work_deficit_span ? parseDuration(work_deficit_span.textContent) : -parseDuration(work_excess_span.textContent);
         let totalWorkMin = total_work_span ? parseDuration(total_work_span.textContent) : null;
-        
+
         const pauseMin = parseDuration(pause_span.textContent);
 
         const now = new Date();
