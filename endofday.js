@@ -28,6 +28,16 @@
         return (h ? parseInt(h[1], 10) : 0) * 60 + (m ? parseInt(m[1], 10) : 0);
     }
 
+    function parseTotalMinutes(text) {
+        if (!text) return null;
+        const matches = [...text.matchAll(/(\d+)\s*h(?:\s*(\d+)\s*m)?|(\d+)\s*m/gi)];
+        if (matches.length < 2) return null;
+        const last = matches[matches.length - 1];
+        return last[3] !== undefined
+            ? parseInt(last[3], 10)
+            : parseInt(last[1], 10) * 60 + (last[2] ? parseInt(last[2], 10) : 0);
+    }
+
     // Language-agnostic: only looks for the H:MM / H.MM pattern (optional am/pm marker).
     // Returns minutes since midnight, or null if no clock time is found.
     function parseClockMinutes(text) {
@@ -98,20 +108,15 @@
         }
 
         let remainingWorkMin = work_deficit_span ? parseDuration(work_deficit_span.textContent) : -parseDuration(work_excess_span.textContent);
+        let totalWorkMin = parseTotalMinutes(work_deficit_span ? work_deficit_span.textContent : work_excess_span);
+        
         const pauseMin = parseDuration(pause_span.textContent);
 
         const now = new Date();
         const nowMin = now.getHours() * 60 + now.getMinutes();
 
         // Net work done so far (elapsed time since start minus pause already taken)
-        let workedSoFarMin = null;
-        let totalWorkMin = null;
-        if (startMin !== null)
-        {
-            workedSoFarMin = Math.max(0, nowMin - startMin - pauseMin);
-            // Estimated total (net) work length for the day
-            totalWorkMin = workedSoFarMin + remainingWorkMin;
-        }
+        let workedSoFarMin = startMin !== null ? Math.max(0, nowMin - startMin - pauseMin) : null;
 
         // Pause still owed to reach 30 minutes (0 if already reached)
         let missingPauseMin = Math.max(0, 30 - pauseMin);
@@ -134,7 +139,7 @@
 
         if (totalWorkMin !== null)
         {
-            console.log("Timebutler script: estimated total work length today: " + formatDuration(totalWorkMin));
+            console.log("Timebutler script: total work length today: " + formatDuration(totalWorkMin));
         }
 
         const end = new Date(Date.now() + (remainingWorkMin + missingPauseMin) * 60 * 1000);
@@ -152,10 +157,10 @@
         end_span.textContent = "🏝️ Done at " + formatClock(end) + (endCustomHrs ? " ("+ formatClock(endCustomHrs) +")" : "");
         if (totalWorkMin !== null)
         {
-            end_span.title = "Estimated total work time: " + formatDuration(totalWorkMin);
+            end_span.title = "Total work time: " + formatDuration(totalWorkMin);
             if (customWorkMin > 0 || CUSTOM_WORK_MINS_GOAL > 0)
             {
-                end_span.title += "; Custom goal: " + formatDuration(customWorkMin > 0 ? customWorkMin : CUSTOM_WORK_MINS_GOAL);
+                end_span.title += "; custom goal: " + formatDuration(customWorkMin > 0 ? customWorkMin : CUSTOM_WORK_MINS_GOAL);
             }
         }
     }
